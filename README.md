@@ -6,7 +6,7 @@ This is the repository of to demonstrate how DBFlow works and possibly show bugs
 
 ### SQLiteDiskIOException after destroying database
 
-After using `FlowManager.destroy();` and `context.getDatabasePath(databaseName);` (in that order), `FlowManager` should have let go of any references to the database and we show now be able to call `FlowManager.init(context);` and proceed to insert to and query database again.
+After using `FlowManager.destroy();` and `context.getDatabasePath(databaseName);` (in that order), `FlowManager` should have let go of any references to the database and we should now be able to call `FlowManager.init(context);` and proceed to insert to and query database again.
 
 On attempting to insert after taking these step the following exception is thrown:
 
