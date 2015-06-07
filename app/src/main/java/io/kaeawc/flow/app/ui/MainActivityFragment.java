@@ -8,12 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.config.BaseDatabaseDefinition;
 import com.raizlabs.android.dbflow.config.FlowManager;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import io.kaeawc.flow.app.R;
 import io.kaeawc.flow.app.data.DatabaseModule;
@@ -26,6 +30,7 @@ public class MainActivityFragment extends Fragment {
     private Button mDestroyDatabase;
     private Button mBuildDatabase;
     private Button mRebootApp;
+    private Switch mUseReflectionHack;
 
     private TextView mWidgetCount;
 
@@ -48,6 +53,8 @@ public class MainActivityFragment extends Fragment {
 
         mRebootApp = (Button) view.findViewById(R.id.reboot_app_button);
         mRebootApp.setOnClickListener(onRebootClicked);
+
+        mUseReflectionHack = (Switch) view.findViewById(R.id.use_reflection_hack_switch);
 
         mWidgetCount = (TextView) view.findViewById(R.id.widget_count);
         long count = Widget.getCount();
@@ -83,31 +90,9 @@ public class MainActivityFragment extends Fragment {
                 return;
             }
 
-            Timber.d("FlowManager.destroy");
-            FlowManager.destroy();
             Context context = getActivity().getApplicationContext();
-            String databaseName = getDatabaseName();
-            boolean deleted = context.deleteDatabase(databaseName);
-
-            if (deleted) {
-                Timber.v("Database deleted");
-            } else {
-                Timber.v("Database not deleted");
-            }
-
-            if (exists(context)) {
-                Timber.v("Database exists before FlowManager.init");
-            } else {
-                Timber.v("Database does not exist before FlowManager.init");
-            }
-
-            FlowManager.init(context);
-
-            if (exists(context)) {
-                Timber.v("Database exists after FlowManager.init");
-            } else {
-                Timber.v("Database does not exist after FlowManager.init");
-            }
+            deleteDatabase(context);
+            flowManagerInit(context);
         }
     };
 
@@ -170,6 +155,67 @@ public class MainActivityFragment extends Fragment {
         } catch (Exception exception) {
             Timber.v(exception, "Database %s doesn't exist.", databaseName);
             return false;
+        }
+    }
+
+    private static void setFinalStatic(Field field, Object newValue) throws NoSuchFieldException, IllegalAccessException {
+        field.setAccessible(true);
+        field.set(null, newValue);
+    }
+
+    private void deleteDatabase(@NonNull Context context) {
+
+        Timber.d("FlowManager.destroy");
+        FlowManager.destroy();
+
+        if (mUseReflectionHack.isEnabled()) {
+            reflectionHack(context);
+        }
+        String databaseName = getDatabaseName();
+        boolean deleted = context.deleteDatabase(databaseName);
+
+        if (deleted) {
+            Timber.v("Database deleted");
+        } else {
+            Timber.v("Database not deleted");
+        }
+
+        if (exists(context)) {
+            Timber.v("Database exists before FlowManager.init");
+        } else {
+            Timber.v("Database does not exist before FlowManager.init");
+        }
+    }
+
+    private void flowManagerInit(@NonNull Context context) {
+
+        FlowManager.init(context);
+
+        if (exists(context)) {
+            Timber.v("Database exists after FlowManager.init");
+        } else {
+            Timber.v("Database does not exist after FlowManager.init");
+        }
+    }
+
+    private void reflectionHack(@NonNull Context context) {
+
+        try {
+            Field field = FlowManager.class.getDeclaredField("mDatabaseHolder");
+            setFinalStatic(field, null);
+            Timber.v("mDatabaseHolder has been set to null");
+        } catch (NoSuchFieldException noSuchField) {
+            Timber.d(noSuchField, "No such field exists in FlowManager");
+        } catch (IllegalAccessException illegalAccess) {
+            Timber.d(illegalAccess, "Illegal access of FlowManager");
+        }
+
+        FlowManager.init(context);
+
+        if (exists(context)) {
+            Timber.v("Database exists after FlowManager.init with reflection hack");
+        } else {
+            Timber.v("Database does not exist after FlowManager.init with reflection hack");
         }
     }
 }

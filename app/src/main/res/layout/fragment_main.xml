@@ -39,4 +39,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <Switch
+        android:id="@+id/use_reflection_hack_switch"
+        android:textOn="Enabled"
+        android:textOff="Disabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 </LinearLayout>
