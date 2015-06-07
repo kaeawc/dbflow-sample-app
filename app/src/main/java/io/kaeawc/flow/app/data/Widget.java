@@ -18,10 +18,6 @@ public class Widget extends BaseModel {
     @Column
     public String name;
 
-    public static List<Widget> getAll() {
-        return new Select().from(Widget.class).queryList();
-    }
-
     public static long getCount() {
         return new Select().count().from(Widget.class).count();
     }
