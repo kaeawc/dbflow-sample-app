@@ -168,7 +168,7 @@ public class MainActivityFragment extends Fragment {
         Timber.d("FlowManager.destroy");
         FlowManager.destroy();
 
-        if (mUseReflectionHack.isEnabled()) {
+        if (mUseReflectionHack.isChecked()) {
             reflectionHack(context);
         }
         String databaseName = getDatabaseName();
