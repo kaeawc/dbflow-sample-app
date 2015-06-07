@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">FlowSampleApp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_widget">Add Widget</string>
+    <string name="destroy_database">Destroy Database</string>
+    <string name="build_database">Build Database</string>
+    <string name="reboot">Reboot App</string>
+    <string name="zero">0</string>
+</resources>
