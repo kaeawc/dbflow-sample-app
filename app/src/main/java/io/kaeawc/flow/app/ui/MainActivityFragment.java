@@ -95,6 +95,19 @@ public class MainActivityFragment extends Fragment {
                 Timber.v("Database not deleted");
             }
 
+            if (exists(context)) {
+                Timber.v("Database exists before FlowManager.init");
+            } else {
+                Timber.v("Database does not exist before FlowManager.init");
+            }
+
+            FlowManager.init(context);
+
+            if (exists(context)) {
+                Timber.v("Database exists after FlowManager.init");
+            } else {
+                Timber.v("Database does not exist after FlowManager.init");
+            }
         }
     };
 
